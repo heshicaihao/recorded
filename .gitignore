@@ -1,0 +1,8 @@
+/Recorded-master/.gradle
+/Recorded-master/.idea
+/Recorded-master/local.properties
+/Recorded-master/*.iml
+/Recorded-master/app/build
+/Recorded-master/app/*.iml
+/Recorded-master/weiXinRecorded/build
+/Recorded-master/weiXinRecorded/*.iml
