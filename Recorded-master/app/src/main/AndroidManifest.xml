@@ -13,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.heshicaihao.recorded.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,11 +21,11 @@
             </intent-filter>
         </activity>
 		
-		<activity android:name="com.heshicaihao.recorded.activity.RecordedActivity"/>
-        <activity android:name="com.heshicaihao.recorded.activity.EditVideoActivity"
+		<activity android:name=".activity.RecordedActivity"/>
+        <activity android:name=".activity.EditVideoActivity"
             android:windowSoftInputMode="adjustResize|adjustPan"/>
-        <activity android:name="com.heshicaihao.recorded.activity.CutSizeActivity"/>
-        <activity android:name="com.heshicaihao.recorded.activity.CutTimeActivity"/>
+        <activity android:name=".activity.CutSizeActivity"/>
+        <activity android:name=".activity.CutTimeActivity"/>
     </application>
 
 </manifest>
