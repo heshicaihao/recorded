@@ -35,7 +35,7 @@ public class LanSongFileUtil {
     private static final Object mLock = new Object();
 
     //可以修改这个路径;
-    public static  String DEFAULT_DIR = "/sdcard/WeiXinRecorded/";
+    public static  String DEFAULT_DIR = "/sdcard/heshicaihao/recorded/";
     protected static String mTmpFileSubFix="";  //后缀,
     protected static String mTmpFilePreFix="";  //前缀;
 

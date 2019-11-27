@@ -86,7 +86,7 @@ public class RecordedActivity extends BaseActivity {
         setContentView(R.layout.activity_recorded);
 
         LanSoEditor.initSDK(this, null);
-        LanSongFileUtil.setFileDir("/sdcard/WeiXinRecorded/"+System.currentTimeMillis()+"/");
+        LanSongFileUtil.setFileDir("/sdcard/heshicaihao/recorded/"+System.currentTimeMillis()+"/");
         LibyuvUtil.loadLibrary();
 
         initUI();
