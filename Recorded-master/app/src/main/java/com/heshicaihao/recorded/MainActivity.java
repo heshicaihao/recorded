@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecordeddemo;
+package com.heshicaihao.recorded;
 
 import android.Manifest;
 import android.content.Intent;
@@ -18,7 +18,8 @@ import android.widget.TextView;
 
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.PermissionListener;
-import com.zhaoss.weixinrecorded.activity.RecordedActivity;
+import com.heshicaihao.recorded.activity.RecordedActivity;
+import com.heshicaihao.recorded.R;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecorded.util;
+package com.heshicaihao.recorded.util;
 
 import com.lansosdk.videoeditor.LanSongFileUtil;
 import com.lansosdk.videoeditor.VideoEditor;

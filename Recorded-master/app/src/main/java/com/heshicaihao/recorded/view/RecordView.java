@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecorded.view;
+package com.heshicaihao.recorded.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,7 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zhaoss.weixinrecordeddemo.R;
+import com.heshicaihao.recorded.R;
 
 public class RecordView extends View {
 

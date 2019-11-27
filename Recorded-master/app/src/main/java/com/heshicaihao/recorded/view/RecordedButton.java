@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecorded.view;
+package com.heshicaihao.recorded.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -15,7 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 
-import com.zhaoss.weixinrecordeddemo.R;
+import com.heshicaihao.recorded.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecorded.activity;
+package com.heshicaihao.recorded.activity;
 
 import android.app.Activity;
 import android.os.Build;
@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.zhaoss.weixinrecordeddemo.R;
+import com.heshicaihao.recorded.R;
 
 /**
  * Created by zhaoshuang on 17/2/23.

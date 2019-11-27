@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecorded.view;
+package com.heshicaihao.recorded.view;
 
 import android.content.Context;
 import android.util.AttributeSet;

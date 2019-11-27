@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecorded.activity;
+package com.heshicaihao.recorded.activity;
 
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -23,11 +23,11 @@ import com.lansosdk.videoeditor.LanSongFileUtil;
 import com.lansosdk.videoeditor.MediaInfo;
 import com.lansosdk.videoeditor.VideoEditor;
 import com.lansosdk.videoeditor.onVideoEditorProgressListener;
-import com.zhaoss.weixinrecorded.util.MyVideoEditor;
-import com.zhaoss.weixinrecorded.util.RxJavaUtil;
-import com.zhaoss.weixinrecorded.util.Utils;
-import com.zhaoss.weixinrecorded.view.ThumbnailView;
-import com.zhaoss.weixinrecordeddemo.R;
+import com.heshicaihao.recorded.util.MyVideoEditor;
+import com.heshicaihao.recorded.util.RxJavaUtil;
+import com.heshicaihao.recorded.util.Utils;
+import com.heshicaihao.recorded.view.ThumbnailView;
+import com.heshicaihao.recorded.R;
 
 import java.io.File;
 

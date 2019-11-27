@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true">
-        <com.zhaoss.weixinrecorded.view.TuyaView
+        <com.heshicaihao.recorded.view.TuyaView
             android:id="@+id/tv_video"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

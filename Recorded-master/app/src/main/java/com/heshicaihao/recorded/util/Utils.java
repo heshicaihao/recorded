@@ -1,4 +1,4 @@
-package com.zhaoss.weixinrecorded.util;
+package com.heshicaihao.recorded.util;
 
 import android.app.Activity;
 
