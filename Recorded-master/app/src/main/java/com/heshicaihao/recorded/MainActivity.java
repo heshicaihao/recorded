@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSucceed(int requestCode, @NonNull List<String> grantPermissions) {
             }
+
             @Override
             public void onFailed(int requestCode, @NonNull List<String> deniedPermissions) {
             }
@@ -51,11 +52,11 @@ public class MainActivity extends AppCompatActivity {
         iv_photo = findViewById(R.id.iv_photo);
     }
 
-    public void startRecord(View v){
+    public void startRecord(View v) {
         Intent intent = new Intent(this, RecordedActivity.class);
         startActivityForResult(intent, 1);
 
-        if(mMediaPlayer != null){
+        if (mMediaPlayer != null) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -66,19 +67,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode==RESULT_OK && data!=null){
-            if(requestCode == 1){
+        if (resultCode == RESULT_OK && data != null) {
+            if (requestCode == 1) {
                 textureView.setVisibility(View.GONE);
                 iv_photo.setVisibility(View.GONE);
                 int dataType = data.getIntExtra(RecordedActivity.INTENT_DATA_TYPE, RecordedActivity.RESULT_TYPE_VIDEO);
-                if(dataType == RecordedActivity.RESULT_TYPE_VIDEO){
+                if (dataType == RecordedActivity.RESULT_TYPE_VIDEO) {
                     String videoPath = data.getStringExtra(RecordedActivity.INTENT_PATH);
-                    tv_path.setText("视频地址: "+videoPath);
+                    tv_path.setText("视频地址: " + videoPath);
                     textureView.setVisibility(View.VISIBLE);
                     playVideo(videoPath);
-                }else if(dataType == RecordedActivity.RESULT_TYPE_PHOTO){
+                } else if (dataType == RecordedActivity.RESULT_TYPE_PHOTO) {
                     String photoPath = data.getStringExtra(RecordedActivity.INTENT_PATH);
-                    tv_path.setText("图片地址: "+photoPath);
+                    tv_path.setText("图片地址: " + photoPath);
                     iv_photo.setVisibility(View.VISIBLE);
                     iv_photo.setImageBitmap(BitmapFactory.decodeFile(photoPath));
                 }
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void playVideo(String videoPath){
+    private void playVideo(String videoPath) {
 
         try {
             mMediaPlayer = new MediaPlayer();
@@ -98,15 +99,15 @@ public class MainActivity extends AppCompatActivity {
                 public void onPrepared(MediaPlayer mp) {
                     mp.start();
 
-                    float ratio = mp.getVideoWidth()*1f/mp.getVideoHeight();
+                    float ratio = mp.getVideoWidth() * 1f / mp.getVideoHeight();
                     int width = textureView.getWidth();
                     ViewGroup.LayoutParams layoutParams = textureView.getLayoutParams();
-                    layoutParams.height = (int) (width/ratio);
+                    layoutParams.height = (int) (width / ratio);
                     textureView.setLayoutParams(layoutParams);
                 }
             });
             mMediaPlayer.prepareAsync();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

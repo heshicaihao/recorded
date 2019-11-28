@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.IntBuffer;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * 各种文件操作.
@@ -36,6 +38,7 @@ public class LanSongFileUtil {
 
     //可以修改这个路径;
     public static  String DEFAULT_DIR = "/sdcard/heshicaihao/recorded/";
+    public static  String Video_DIR = "/sdcard/heshicaihao/Video/";
     protected static String mTmpFileSubFix="";  //后缀,
     protected static String mTmpFilePreFix="";  //前缀;
 
@@ -78,6 +81,59 @@ public class LanSongFileUtil {
                 Log.e("LSDelete", "---XXX--return : "+ (float) n / 100f);
                 return (float) n / 100f;
             }
+        }
+    }
+
+
+    /**
+     * 在指定的文件夹里创建一个文件名字, 名字是当前时间,指定后缀.
+     *
+     * @return
+     */
+    public static String mycreateFile(String dir, String suffix) {
+        synchronized (mLock) {
+            String dirPath = dir;
+            File d = new File(dirPath);
+            if (!d.exists())
+                d.mkdirs();
+
+            if (dirPath.endsWith("/") == false) {
+                dirPath += "/";
+            }
+
+            SimpleDateFormat simpleDateFormat01 = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat simpleDateFormat02 = new SimpleDateFormat("HHmmss");
+            Date date = new Date(System.currentTimeMillis());
+
+            String name=mTmpFilePreFix;
+            name += "VID_";
+            name += simpleDateFormat01.format(date);
+            name += "_";
+            name += simpleDateFormat02.format(date);
+            name+=mTmpFileSubFix;
+            if (suffix.startsWith(".") == false) {
+                name += ".";
+            }
+            name += suffix;
+
+
+            try {
+                Thread.sleep(1); // 保持文件名的唯一性.
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            String retPath=dirPath+name;
+            File file = new File(retPath);
+            if (file.exists() == false) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return retPath;
         }
     }
 
@@ -150,7 +206,8 @@ public class LanSongFileUtil {
      * @return
      */
     public static String createMp4FileInBox() {
-        return createFile(DEFAULT_DIR, ".mp4");
+//        return createFile(DEFAULT_DIR, ".mp4");
+        return mycreateFile(Video_DIR, ".mp4");
     }
 
     /**
@@ -449,6 +506,22 @@ public class LanSongFileUtil {
             return false;
         }
         return ret;
+    }
+
+
+    //flie：要删除的文件夹的所在位置
+    public static  void deleteFiles(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                File f = files[i];
+                deleteFile(f.getPath());
+            }
+            file.delete();//如要保留文件夹，只删除文件，请注释这行
+        } else if (file.exists()) {
+            file.delete();
+        }
+
     }
 
     public static boolean close(Closeable closeable) {
