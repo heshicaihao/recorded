@@ -1,10 +1,13 @@
 package com.heshicaihao.recorded.myactivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -22,6 +25,7 @@ import com.heshicaihao.recorded.util.MyVideoEditor;
 import com.heshicaihao.recorded.util.RecordUtil;
 import com.heshicaihao.recorded.util.RxJavaUtil;
 import com.heshicaihao.recorded.util.Utils;
+import com.heshicaihao.recorded.view.MyRecordView;
 import com.heshicaihao.recorded.view.RecordView;
 import com.lansosdk.videoeditor.LanSoEditor;
 import com.lansosdk.videoeditor.LanSongFileUtil;
@@ -36,6 +40,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -43,7 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 基于ffmpeg视频编译
  * Created by heshicaihao on 19/6/18.
  */
-public class MyRecordedActivity extends BaseActivity {
+public class MyRecordedActivity extends BaseActivity implements View.OnClickListener {
 
     public static final String INTENT_PATH = "intent_path";
     public static final String INTENT_DATA_TYPE = "result_data_type";
@@ -54,7 +61,7 @@ public class MyRecordedActivity extends BaseActivity {
     public static final int REQUEST_CODE_KEY = 100;
 
     private SurfaceView surfaceView;
-    private RecordView recordView;
+    private MyRecordView recordView;
     private ImageView iv_delete;
     private ImageView iv_next;
     private ImageView iv_change_camera;
@@ -79,6 +86,73 @@ public class MyRecordedActivity extends BaseActivity {
     private float executeProgress;//编译进度
     private String audioPath;
     private RecordUtil.OnPreviewFrameListener mOnPreviewFrameListener;
+
+    private Timer timer;
+    private TimerTask timerTask;
+    private boolean isMyRecording = false ;
+    public static final int MSG_TIME = 1;
+    private int time = 0;
+
+
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case MSG_TIME:
+                    freshTime();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    private void freshTime() {
+        time++;
+        tv_hint.setText(formatTime(time));
+
+    }
+
+    /**
+     * 将秒转化为 HH:mm:ss 的格式
+     *
+     * @param time 秒
+     * @return
+     */
+    private String formatTime(int time) {
+        int hour = time / 3600;
+        int min = time % 3600 / 60;
+        int second = time % 60;
+
+        return String.format(Locale.CHINESE, "%02d:%02d:%02d", hour, min, second);
+    }
+
+    private void statTime(){
+        timer = new Timer();
+        timerTask = new TimerTask(){
+            @Override
+            public void run() {
+                if (isMyRecording){
+                    Message msg = new Message();
+                    msg.what = MSG_TIME;
+                    //发送
+                    handler.sendMessage(msg);
+                }
+            }
+        };
+        if(timer != null){
+            timer.scheduleAtFixedRate(timerTask, 1000,1000);//严格按照时间执行
+        }
+
+    }
+
+    private void stopTime(){
+        if(timer!= null){
+            timer.cancel();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,30 +319,7 @@ public class MyRecordedActivity extends BaseActivity {
     }
 
     private void initData() {
-
-        recordView.setOnGestureListener(new RecordView.OnGestureListener() {
-            @Override
-            public void onDown() {
-                //长按录像
-                isRecordVideo.set(true);
-                startRecord();
-                goneRecordLayout();
-            }
-            @Override
-            public void onUp() {
-                if(isRecordVideo.get()){
-                    isRecordVideo.set(false);
-                    upEvent();
-                }
-            }
-            @Override
-            public void onClick() {
-                if(segmentList.size() == 0){
-                    isShotPhoto.set(true);
-                }
-            }
-        });
-
+        recordView.setOnClickListener(this);
         iv_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -360,13 +411,6 @@ public class MyRecordedActivity extends BaseActivity {
         return pcmPath;
     }
 
-    private void goneRecordLayout(){
-
-        tv_hint.setVisibility(View.GONE);
-        iv_delete.setVisibility(View.GONE);
-        iv_next.setVisibility(View.GONE);
-    }
-
     private long videoDuration;
     private long recordTime;
     private String videoPath;
@@ -389,7 +433,7 @@ public class MyRecordedActivity extends BaseActivity {
             }
             @Override
             public void onFinish(Boolean result) {
-                if(recordView.isDown()){
+                if(isMyRecording){
                     mOnPreviewFrameListener = recordUtil.start();
                     videoDuration = 0;
                     recordTime = System.currentTimeMillis();
@@ -466,12 +510,7 @@ public class MyRecordedActivity extends BaseActivity {
      * 初始化视频拍摄状态
      */
     private void initRecorderState(){
-
-        if(segmentList.size() > 0){
-            tv_hint.setText("长按录像");
-        }else{
-            tv_hint.setText("长按录像 点击拍照");
-        }
+        tv_hint.setText("开始录像");
         tv_hint.setVisibility(View.VISIBLE);
 
         iv_delete.setVisibility(View.VISIBLE);
@@ -483,8 +522,6 @@ public class MyRecordedActivity extends BaseActivity {
      * 清除录制信息
      */
     private void cleanRecord(){
-
-        recordView.initState();
         segmentList.clear();
         aacList.clear();
         timeList.clear();
@@ -492,8 +529,6 @@ public class MyRecordedActivity extends BaseActivity {
         executeCount = 0;
         executeProgress = 0;
 
-        iv_delete.setVisibility(View.INVISIBLE);
-        iv_next.setVisibility(View.INVISIBLE);
         iv_flash_video.setVisibility(View.VISIBLE);
     }
 
@@ -524,5 +559,32 @@ public class MyRecordedActivity extends BaseActivity {
             cleanRecord();
             initRecorderState();
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+
+            case R.id.recordView:
+
+                isMyRecording =!isMyRecording;
+                if (isMyRecording){
+                    //长按录像
+                    isRecordVideo.set(true);
+                    startRecord();
+                    statTime();
+                }else{
+                    if(isRecordVideo.get()){
+                        isRecordVideo.set(false);
+                        upEvent();
+                    }
+                    stopTime();
+                }
+                break;
+
+                default:
+
+        }
+
     }
 }
