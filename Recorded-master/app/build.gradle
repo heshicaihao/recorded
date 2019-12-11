@@ -1,13 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.heshicaihao.recorded"
         minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 29
+        versionCode 2
+        versionName "2.0.0"
 
         ndk {
             abiFilters 'armeabi-v7a'
@@ -17,21 +18,46 @@ android {
             main {
                 jniLibs.srcDirs = ['libs']
             }
-}
+        }
     }
+
+    signingConfigs {
+        debug {
+            storeFile file('../release.jks')
+            storePassword "recorded_1024"
+            keyAlias "recorded"
+            keyPassword "recorded_1024"
+        }
+        release {
+            storeFile file('../release.jks')
+            storePassword "recorded_1024"
+            keyAlias "recorded"
+            keyPassword "recorded_1024"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            zipAlignEnabled true
+            signingConfig signingConfigs.release
         }
     }
+
+    android.applicationVariants.all { variant ->
+
+        variant.outputs.all {
+            outputFileName = "recorded_${variant.versionCode}_v${variant.versionName}_${buildType.name}.apk"
+        }
+
+    }
+
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation files('libs/lansongcommon_hx.jar')
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.yanzhenjie:permission:1.1.2'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'

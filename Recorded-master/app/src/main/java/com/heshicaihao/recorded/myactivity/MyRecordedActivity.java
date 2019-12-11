@@ -8,7 +8,6 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -18,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.heshicaihao.recorded.R;
 import com.heshicaihao.recorded.activity.BaseActivity;
 import com.heshicaihao.recorded.util.CameraHelp;
@@ -26,7 +27,6 @@ import com.heshicaihao.recorded.util.RecordUtil;
 import com.heshicaihao.recorded.util.RxJavaUtil;
 import com.heshicaihao.recorded.util.Utils;
 import com.heshicaihao.recorded.view.MyRecordView;
-import com.heshicaihao.recorded.view.RecordView;
 import com.lansosdk.videoeditor.LanSoEditor;
 import com.lansosdk.videoeditor.LanSongFileUtil;
 import com.lansosdk.videoeditor.VideoEditor;
