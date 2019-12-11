@@ -14,28 +14,55 @@
             android:layout_height="match_parent"
             android:layout_gravity="center" />
     </FrameLayout>
-
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/basic_activity_margin2"
         android:paddingRight="@dimen/basic_activity_margin2"
         android:layout_marginBottom="@dimen/basic_activity_margin2"
-        android:layout_alignParentBottom="true">
-        <ImageView
-            android:id="@+id/iv_flash_video"
-            android:layout_width="@dimen/title_bar_hei"
-            android:layout_height="@dimen/title_bar_hei"
-            android:padding="@dimen/basic_activity_margin2"
-            android:src="@mipmap/video_flash_close"/>
-        <ImageView
-            android:id="@+id/iv_camera_mode"
-            android:layout_width="@dimen/title_bar_hei"
-            android:layout_height="@dimen/title_bar_hei"
-            android:layout_alignParentRight="true"
-            android:padding="@dimen/basic_activity_margin2"
-            android:src="@mipmap/video_camera"/>
-    </RelativeLayout>
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <TextView
+                android:id="@+id/start_record_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/basic_activity_margin2"
+                android:textColor="@color/color1"
+                android:text="@string/start_record"/>
+            <TextView
+                android:id="@+id/stop_record_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:padding="@dimen/basic_activity_margin2"
+                android:textColor="@color/color1"
+                android:text="@string/stop_record"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:id="@+id/iv_flash_video"
+                android:layout_width="@dimen/title_bar_hei"
+                android:layout_height="@dimen/title_bar_hei"
+                android:padding="@dimen/basic_activity_margin2"
+                android:src="@mipmap/video_flash_close"/>
+            <ImageView
+                android:id="@+id/iv_camera_mode"
+                android:layout_width="@dimen/title_bar_hei"
+                android:layout_height="@dimen/title_bar_hei"
+                android:layout_alignParentRight="true"
+                android:padding="@dimen/basic_activity_margin2"
+                android:src="@mipmap/video_camera"/>
+        </RelativeLayout>
+    </LinearLayout>
+
 
     <RelativeLayout
         android:id="@+id/rl_record_button"

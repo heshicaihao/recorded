@@ -2,11 +2,15 @@ package com.heshicaihao.recorded.myactivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -21,6 +25,7 @@ import androidx.annotation.NonNull;
 
 import com.heshicaihao.recorded.R;
 import com.heshicaihao.recorded.activity.BaseActivity;
+import com.heshicaihao.recorded.service.RecordedService;
 import com.heshicaihao.recorded.util.CameraHelp;
 import com.heshicaihao.recorded.util.MyVideoEditor;
 import com.heshicaihao.recorded.util.RecordUtil;
@@ -67,7 +72,13 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
     private ImageView iv_change_camera;
     private ImageView iv_flash_video;
     private TextView editorTextView;
+
+    RecordedService recordedService;
+    private boolean startService;
+
     private TextView tv_hint;
+    private TextView start_record_tv;
+    private TextView stop_record_tv;
 
     private ArrayList<String> segmentList = new ArrayList<>();//分段视频地址
     private ArrayList<String> aacList = new ArrayList<>();//分段音频地址
@@ -92,67 +103,52 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
     private boolean isMyRecording = false ;
     public static final int MSG_TIME = 1;
     private int time = 0;
+    private long videoDuration;
+    private long recordTime;
+    private String videoPath;
 
 
-    @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case MSG_TIME:
-                    freshTime();
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
 
-    private void freshTime() {
-        time++;
-        tv_hint.setText(formatTime(time));
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
 
-    }
+            case R.id.start_record_tv:
+                statTime();
+                recordView.setVisibility(View.GONE);
+                initService();
+                break;
+            case R.id.stop_record_tv:
+                stopTime();
+                stopService();
+                recordView.setVisibility(View.VISIBLE);
+                break;
 
-    /**
-     * 将秒转化为 HH:mm:ss 的格式
-     *
-     * @param time 秒
-     * @return
-     */
-    private String formatTime(int time) {
-        int hour = time / 3600;
-        int min = time % 3600 / 60;
-        int second = time % 60;
-
-        return String.format(Locale.CHINESE, "%02d:%02d:%02d", hour, min, second);
-    }
-
-    private void statTime(){
-        timer = new Timer();
-        timerTask = new TimerTask(){
-            @Override
-            public void run() {
+            case R.id.recordView:
+                start_record_tv.setVisibility(View.GONE);
+                stop_record_tv.setVisibility(View.GONE);
+                isMyRecording =!isMyRecording;
                 if (isMyRecording){
-                    Message msg = new Message();
-                    msg.what = MSG_TIME;
-                    //发送
-                    handler.sendMessage(msg);
+                    //长按录像
+                    isRecordVideo.set(true);
+                    startRecord();
+                    statTime();
+                }else{
+                    if(isRecordVideo.get()){
+                        isRecordVideo.set(false);
+                        upEvent();
+                    }
+                    stopTime();
                 }
-            }
-        };
-        if(timer != null){
-            timer.scheduleAtFixedRate(timerTask, 1000,1000);//严格按照时间执行
+                break;
+
+            default:
+
         }
 
     }
 
-    private void stopTime(){
-        if(timer!= null){
-            timer.cancel();
-        }
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +164,7 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
                 .requestCode(0).callback(new PermissionListener() {
             @Override
             public void onSucceed(int requestCode, @NonNull List<String> grantPermissions) {
+
             }
 
             @Override
@@ -192,6 +189,9 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
         iv_flash_video = findViewById(R.id.iv_flash_video);
         iv_change_camera = findViewById(R.id.iv_camera_mode);
         tv_hint = findViewById(R.id.tv_hint);
+
+        start_record_tv = findViewById(R.id.start_record_tv);
+        stop_record_tv = findViewById(R.id.stop_record_tv);
 
         surfaceView.post(new Runnable() {
             @Override
@@ -326,6 +326,8 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
                 deleteSegment();
             }
         });
+        start_record_tv.setOnClickListener(this);
+        stop_record_tv.setOnClickListener(this);
 
         iv_next.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -411,9 +413,7 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
         return pcmPath;
     }
 
-    private long videoDuration;
-    private long recordTime;
-    private String videoPath;
+
     private void startRecord(){
 
         RxJavaUtil.run(new RxJavaUtil.OnRxAndroidListener<Boolean>() {
@@ -561,30 +561,101 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-
-            case R.id.recordView:
-
-                isMyRecording =!isMyRecording;
-                if (isMyRecording){
-                    //长按录像
-                    isRecordVideo.set(true);
-                    startRecord();
-                    statTime();
-                }else{
-                    if(isRecordVideo.get()){
-                        isRecordVideo.set(false);
-                        upEvent();
-                    }
-                    stopTime();
-                }
-                break;
-
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case MSG_TIME:
+                    freshTime();
+                    break;
                 default:
+                    break;
+            }
+        }
+    };
 
+    private void freshTime() {
+        time++;
+        tv_hint.setText(formatTime(time));
+
+    }
+
+    /**
+     * 将秒转化为 HH:mm:ss 的格式
+     *
+     * @param time 秒
+     * @return
+     */
+    private String formatTime(int time) {
+        int hour = time / 3600;
+        int min = time % 3600 / 60;
+        int second = time % 60;
+
+        return String.format(Locale.CHINESE, "%02d:%02d:%02d", hour, min, second);
+    }
+
+    private void statTime(){
+        timer = new Timer();
+        timerTask = new TimerTask(){
+            @Override
+            public void run() {
+                if (isMyRecording){
+                    Message msg = new Message();
+                    msg.what = MSG_TIME;
+                    //发送
+                    handler.sendMessage(msg);
+                }
+            }
+        };
+        if(timer != null){
+            timer.scheduleAtFixedRate(timerTask, 1000,1000);//严格按照时间执行
         }
 
     }
+
+    private void stopTime(){
+        if(timer!= null){
+            timer.cancel();
+        }
+    }
+
+
+
+    private ServiceConnection conn = new ServiceConnection() {
+        /** 获取服务对象时的操作 */
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // TODO Auto-generated method stub
+            recordedService = ((RecordedService.MyBinder) service).getService();
+
+        }
+
+        /** 无法获取到服务对象时的操作 */
+        public void onServiceDisconnected(ComponentName name) {
+            // TODO Auto-generated method stub
+            recordedService = null;
+        }
+
+    };
+
+
+    /**
+     * 工程师上传位置信息服务
+     */
+    private void initService() {
+        if (!startService) {
+            Intent intent = new Intent(MyRecordedActivity.this, RecordedService.class);
+            bindService(intent, conn, Context.BIND_AUTO_CREATE);
+        }
+        startService = true;
+    }
+
+    private void stopService() {
+        if (startService) {
+                unbindService(conn);
+                startService = false;
+        }
+    }
+
 }

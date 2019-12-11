@@ -18,14 +18,6 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-<!--        <activity android:name=".MainActivity">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
-
         <activity android:name=".myactivity.MyRecordedActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,6 +31,15 @@
             android:windowSoftInputMode="adjustResize|adjustPan"/>
         <activity android:name=".activity.CutSizeActivity"/>
         <activity android:name=".activity.CutTimeActivity"/>
+
+        <service
+            android:name=".service.RecordedService"
+            android:enabled="true">
+            <intent-filter android:priority="1000">
+                <action android:name="com.heshicaihao.recorded.RecordedService.Action" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
