@@ -1,1 +1,2 @@
+rootProject.name='录像机'
 include ':app'
