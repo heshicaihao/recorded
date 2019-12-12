@@ -31,15 +31,6 @@
             android:windowSoftInputMode="adjustResize|adjustPan"/>
         <activity android:name=".activity.CutSizeActivity"/>
         <activity android:name=".activity.CutTimeActivity"/>
-
-        <service
-            android:name=".service.RecordedService"
-            android:enabled="true">
-            <intent-filter android:priority="1000">
-                <action android:name="com.heshicaihao.recorded.RecordedService.Action" />
-            </intent-filter>
-        </service>
-
     </application>
 
 </manifest>
