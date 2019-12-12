@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
@@ -684,6 +685,7 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
         webview.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
                 return true;
             }
 
@@ -735,8 +737,11 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
             }
         });
         webview.getSettings().setDisplayZoomControls(false);//设定缩放控件隐藏
+        }
 
-    }
+
+
+
 
 
 }
