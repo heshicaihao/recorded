@@ -2,18 +2,30 @@ package com.heshicaihao.recorded.myactivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
+import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +81,13 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
     private TextView editorTextView;
     private TextView tv_hint;
 
+    private RelativeLayout deal_view;
+    private WebView webview;
+    private RelativeLayout is_look_rl;
+    private ImageView is_look_iv;
+    private ImageView head_back;
+
+
     private ArrayList<String> segmentList = new ArrayList<>();//分段视频地址
     private ArrayList<String> aacList = new ArrayList<>();//分段音频地址
     private ArrayList<Long> timeList = new ArrayList<>();//分段录制时间
@@ -92,65 +111,58 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
     private boolean isMyRecording = false ;
     public static final int MSG_TIME = 1;
     private int time = 0;
+    private boolean isLook = false ;
+    private String url = "http://wap.hao123.com/";
+    private long m_nLastExitTimeStamp;
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.is_look_rl:
+                setIsLook();
 
-    @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case MSG_TIME:
-                    freshTime();
-                    break;
-                default:
-                    break;
-            }
+                break;
+
+            case R.id.head_back:
+                dealback();
+                finish();
+                break;
+
+            case R.id.recordView:
+
+                isMyRecording =!isMyRecording;
+                if (isMyRecording){
+                    //长按录像
+                    isRecordVideo.set(true);
+                    startRecord();
+                    statTime();
+                }else{
+                    if(isRecordVideo.get()){
+                        isRecordVideo.set(false);
+                        upEvent();
+                    }
+                    stopTime();
+                }
+                break;
+
+            default:
+
         }
-    };
-
-    private void freshTime() {
-        time++;
-        tv_hint.setText(formatTime(time));
 
     }
 
     /**
-     * 将秒转化为 HH:mm:ss 的格式
      *
-     * @param time 秒
-     * @return
+     * 设置密码是否可见
      */
-    private String formatTime(int time) {
-        int hour = time / 3600;
-        int min = time % 3600 / 60;
-        int second = time % 60;
-
-        return String.format(Locale.CHINESE, "%02d:%02d:%02d", hour, min, second);
-    }
-
-    private void statTime(){
-        timer = new Timer();
-        timerTask = new TimerTask(){
-            @Override
-            public void run() {
-                if (isMyRecording){
-                    Message msg = new Message();
-                    msg.what = MSG_TIME;
-                    //发送
-                    handler.sendMessage(msg);
-                }
-            }
-        };
-        if(timer != null){
-            timer.scheduleAtFixedRate(timerTask, 1000,1000);//严格按照时间执行
-        }
-
-    }
-
-    private void stopTime(){
-        if(timer!= null){
-            timer.cancel();
+    private void setIsLook() {
+        isLook = !isLook;
+        if (isLook){
+            is_look_iv.setBackgroundResource(R.mipmap.password_visible);
+            deal_view.setVisibility(View.VISIBLE);
+        }else{
+            is_look_iv.setBackgroundResource(R.mipmap.password_in_visible);
+            deal_view.setVisibility(View.GONE);
         }
     }
 
@@ -159,7 +171,13 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_my_recorded);
+        initView();
+    }
+
+    private void initView() {
+        isLook = true;
         AndPermission.with(this).permission(
+                Manifest.permission.INTERNET,
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS,
@@ -192,6 +210,16 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
         iv_flash_video = findViewById(R.id.iv_flash_video);
         iv_change_camera = findViewById(R.id.iv_camera_mode);
         tv_hint = findViewById(R.id.tv_hint);
+
+        deal_view = findViewById(R.id.deal_view);
+        webview = findViewById(R.id.webview);
+        initWeb();
+        is_look_rl = findViewById(R.id.is_look_rl);
+        is_look_iv = findViewById(R.id.is_look_iv);
+        head_back = findViewById(R.id.head_back);
+
+        is_look_rl.setOnClickListener(this);
+        head_back.setOnClickListener(this);
 
         surfaceView.post(new Runnable() {
             @Override
@@ -535,6 +563,10 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        dealback();
+    }
+
+    private void dealback() {
         LanSongFileUtil.deleteFiles(new File(LanSongFileUtil.DEFAULT_DIR));
         cleanRecord();
         if(mCameraHelp != null){
@@ -561,30 +593,150 @@ public class MyRecordedActivity extends BaseActivity implements View.OnClickList
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case MSG_TIME:
+                    freshTime();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
-            case R.id.recordView:
+    private void freshTime() {
+        time++;
+        tv_hint.setText(formatTime(time));
 
-                isMyRecording =!isMyRecording;
+    }
+
+    /**
+     * 将秒转化为 HH:mm:ss 的格式
+     *
+     * @param time 秒
+     * @return
+     */
+    private String formatTime(int time) {
+        int hour = time / 3600;
+        int min = time % 3600 / 60;
+        int second = time % 60;
+
+        return String.format(Locale.CHINESE, "%02d:%02d:%02d", hour, min, second);
+    }
+
+    private void statTime(){
+        timer = new Timer();
+        timerTask = new TimerTask(){
+            @Override
+            public void run() {
                 if (isMyRecording){
-                    //长按录像
-                    isRecordVideo.set(true);
-                    startRecord();
-                    statTime();
-                }else{
-                    if(isRecordVideo.get()){
-                        isRecordVideo.set(false);
-                        upEvent();
-                    }
-                    stopTime();
+                    Message msg = new Message();
+                    msg.what = MSG_TIME;
+                    //发送
+                    handler.sendMessage(msg);
                 }
-                break;
-
-            default:
-
+            }
+        };
+        if(timer != null){
+            timer.scheduleAtFixedRate(timerTask, 1000,1000);//严格按照时间执行
         }
 
     }
+
+    private void stopTime(){
+        if(timer!= null){
+            timer.cancel();
+        }
+    }
+
+    private void initWeb() {
+        webview.loadUrl(url);
+        //ml的图片就会以单列显示就不会变行占了别的位置
+        webview.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        //让缩放显示的最小值为起始
+        webview.setInitialScale(5);
+        // 设置可以支持缩放
+        webview.getSettings().setSupportZoom(true);
+        // 设置出现缩放工具
+        webview.getSettings().setBuiltInZoomControls(true);
+        //扩大比例的缩放
+        webview.getSettings().setUseWideViewPort(true);
+        webview.getSettings().setTextSize(WebSettings.TextSize.NORMAL);
+        webview.getSettings().setTextZoom(100);
+        webview.getSettings().setLoadWithOverviewMode(true);
+        // 开启 DOM storage API 功能
+        webview.getSettings().setDomStorageEnabled(true);
+        webview.getSettings().setUseWideViewPort(true); // 关键点
+        webview.getSettings().setBlockNetworkImage(false);
+        //开启定位设置
+        webview.getSettings().setGeolocationEnabled(true);
+        webview.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onReceivedTitle(WebView view, String title) {
+                super.onReceivedTitle(view, title);
+            }
+
+        });
+        webview.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return true;
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+            }
+
+            @Override
+            public void onReceivedSslError(WebView webView, SslErrorHandler sslErrorHandler, SslError sslError) {
+                sslErrorHandler.proceed();
+            }
+        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            webview.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
+        webview.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (keyCode == KeyEvent.KEYCODE_BACK && webview.canGoBack()) {  //表示按返回键
+                        if (webview.canGoBack()) {//网页可以后退
+                            webview.goBack();
+                            return true;
+                        } else {//不能后退响应连续点击两次退出App操作
+                            if (SystemClock.uptimeMillis() - m_nLastExitTimeStamp < 2500) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {//退出app
+                                        ActivityManager activityMgr = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                                        System.exit(0);
+                                        activityMgr.killBackgroundProcesses(getPackageName());
+                                    }
+                                });
+                                onBackPressed();
+                            } else {
+                                m_nLastExitTimeStamp = SystemClock.uptimeMillis();
+                                Toast.makeText(MyRecordedActivity.this, "再次返回，退出App", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+        webview.getSettings().setDisplayZoomControls(false);//设定缩放控件隐藏
+
+    }
+
+
 }

@@ -13,72 +13,141 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/W98"
+                android:background="#4FC5F3"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/head_back"
+                    android:layout_width="@dimen/W98"
+                    android:layout_height="@dimen/W98"
+                    android:scaleType="center"
+                    android:src="@mipmap/back" />
+
+                <TextView
+                    android:layout_width="@dimen/W98"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:scaleType="center"
+                    android:textSize="@dimen/H38"
+                    android:text="Hao123网址导航" />
+
+                <RelativeLayout
+                    android:id="@+id/is_look_rl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/W98"
+                    android:paddingRight="@dimen/H30"
+                    android:paddingLeft="@dimen/H30"
+                    android:paddingTop="@dimen/H20"
+                    android:paddingBottom="@dimen/H20"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/is_look_iv"
+                        android:layout_width="@dimen/H30"
+                        android:layout_height="@dimen/H20"
+                        android:background="@mipmap/password_visible" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <WebView
+                android:id="@+id/webview"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
     </FrameLayout>
 
     <RelativeLayout
+        android:id="@+id/deal_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/basic_activity_margin2"
-        android:paddingRight="@dimen/basic_activity_margin2"
-        android:layout_marginBottom="@dimen/basic_activity_margin2"
-        android:layout_alignParentBottom="true">
-        <ImageView
-            android:id="@+id/iv_flash_video"
-            android:layout_width="@dimen/title_bar_hei"
-            android:layout_height="@dimen/title_bar_hei"
-            android:padding="@dimen/basic_activity_margin2"
-            android:src="@mipmap/video_flash_close"/>
-        <ImageView
-            android:id="@+id/iv_camera_mode"
-            android:layout_width="@dimen/title_bar_hei"
-            android:layout_height="@dimen/title_bar_hei"
-            android:layout_alignParentRight="true"
-            android:padding="@dimen/basic_activity_margin2"
-            android:src="@mipmap/video_camera"/>
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/basic_activity_margin2"
+            android:paddingRight="@dimen/basic_activity_margin2"
+            android:layout_marginBottom="@dimen/basic_activity_margin2"
+            android:layout_alignParentBottom="true">
+            <ImageView
+                android:id="@+id/iv_flash_video"
+                android:layout_width="@dimen/title_bar_hei"
+                android:layout_height="@dimen/title_bar_hei"
+                android:padding="@dimen/basic_activity_margin2"
+                android:src="@mipmap/video_flash_close"/>
+            <ImageView
+                android:id="@+id/iv_camera_mode"
+                android:layout_width="@dimen/title_bar_hei"
+                android:layout_height="@dimen/title_bar_hei"
+                android:layout_alignParentRight="true"
+                android:padding="@dimen/basic_activity_margin2"
+                android:src="@mipmap/video_camera"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_record_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="70dp">
+
+            <com.heshicaihao.recorded.view.MyRecordView
+                android:id="@+id/recordView"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_centerHorizontal="true" />
+
+            <ImageView
+                android:id="@+id/iv_delete"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:visibility="invisible"
+                android:layout_toLeftOf="@id/recordView"
+                android:layout_marginRight="@dimen/basic_activity_margin"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/video_delete"/>
+
+            <ImageView
+                android:id="@+id/iv_next"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_toRightOf="@id/recordView"
+                android:layout_marginLeft="@dimen/basic_activity_margin"
+                android:visibility="invisible"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/video_next"/>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#fff"
+            android:textSize="18sp"
+            android:padding="5dp"
+            android:text="点击录像"
+            android:background="@drawable/video_hint_circle"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/rl_record_button"/>
+
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/rl_record_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="70dp">
-        <com.heshicaihao.recorded.view.MyRecordView
-            android:id="@+id/recordView"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_centerHorizontal="true" />
-        <ImageView
-            android:id="@+id/iv_delete"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:visibility="invisible"
-            android:layout_toLeftOf="@id/recordView"
-            android:layout_marginRight="@dimen/basic_activity_margin"
-            android:layout_centerVertical="true"
-            android:src="@mipmap/video_delete"/>
-        <ImageView
-            android:id="@+id/iv_next"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_toRightOf="@id/recordView"
-            android:layout_marginLeft="@dimen/basic_activity_margin"
-            android:visibility="invisible"
-            android:layout_centerVertical="true"
-            android:src="@mipmap/video_next"/>
-    </RelativeLayout>
-
-    <TextView
-        android:id="@+id/tv_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#fff"
-        android:textSize="18sp"
-        android:padding="5dp"
-        android:text="点击录像"
-        android:background="@drawable/video_hint_circle"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@id/rl_record_button"/>
 
 
 </RelativeLayout>
